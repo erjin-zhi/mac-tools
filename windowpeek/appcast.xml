@@ -1,1 +1,25 @@
-<?xml version="1.0" encoding="utf-8"?><rss version="2.0"><channel><title>Window Peek</title></channel></rss>
+<?xml version="1.0" standalone="yes"?>
+<rss xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle" version="2.0">
+    <channel>
+        <title>Window Peek</title>
+        <item>
+            <title>0.3.0</title>
+            <pubDate>Tue, 15 Sep 2026 00:12:44 +0800</pubDate>
+            <sparkle:version>5</sparkle:version>
+            <sparkle:shortVersionString>0.3.0</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+            <sparkle:hardwareRequirements>arm64</sparkle:hardwareRequirements>
+            <description sparkle:format="markdown"><![CDATA[Window Peek 现在支持在应用内检查和安装更新。
+
+- 默认每天自动检查新版本，也可以从菜单栏或设置中手动检查。
+- 发现更新后先展示版本说明，由你选择是否下载和安装；安装完成后重新启动应用。
+- 自动检查可以在设置中关闭，不影响手动检查。
+
+0.2.2 及更早版本需要手动安装本次更新，之后即可使用应用内更新。请替换原安装位置的应用，避免保留多个副本。
+
+需要 macOS 14 或更新版本，当前安装包适用于 Apple Silicon。
+]]></description>
+            <enclosure url="https://github.com/erjin-zhi/windowpick/releases/download/windowpeek-v0.3.0/WindowPeek-0.3.0-arm64-Installer.dmg" length="2456347" type="application/octet-stream" sparkle:edSignature="8tQSuJWIjfTddzoKdrzOGuNQ+v0BeQ4OHFi1hxkRPBM3M5vuzBZgwOq18CXAphZKW6+/NoBnO9BqVAgrFl2XCQ=="/>
+        </item>
+    </channel>
+</rss>
