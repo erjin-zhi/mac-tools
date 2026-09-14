@@ -32,7 +32,7 @@ struct PreviewCheck {
             let host = NSHostingView(rootView: SwitcherView(model: model))
             host.sizingOptions = []
             panel.contentView = host
-            let expected = CGRect(x: 100, y: 100, width: width, height: 330)
+            let expected = CGRect(x: 100, y: 100, width: width, height: 366)
             panel.setFrame(expected, display: false, animate: false)
             func settle() throws {
                 RunLoop.main.run(until: Date().addingTimeInterval(0.1))

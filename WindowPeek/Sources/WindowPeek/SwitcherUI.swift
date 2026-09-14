@@ -87,20 +87,46 @@ struct SwitcherView: View {
                     .onAppear { proxy.scrollTo(model.selection, anchor: .center) }
                 }
             }
-            HStack(spacing: 7) {
-                Text(model.activationKey.symbol).foregroundStyle(.mint)
-                Text("松开切换").foregroundStyle(.primary)
-                Text("·  ← → 选择  ·  Esc 取消").foregroundStyle(.secondary)
-                Spacer()
-                Text(model.windows.count > 9 ? "前 9 个支持数字直达，其余用方向键" : "WINDOW PEEK")
-                    .font(.system(size: 10, weight: .medium, design: .monospaced)).foregroundStyle(.tertiary)
-            }.font(.system(size: 11))
+            VStack(alignment: .leading, spacing: 8) {
+                HStack(spacing: 8) {
+                    Text("按住")
+                    ShortcutKeycap(symbol: model.activationKey.symbol)
+                    Text("＋").foregroundStyle(.secondary)
+                    ShortcutKeycap(symbol: "`")
+                    Text("反复按反引号，循环选择同一 App 的窗口")
+                }
+                .font(.system(size: 12))
+                .accessibilityElement(children: .ignore)
+                .accessibilityLabel("按住 \(model.activationKey.name)，反复按反引号键，循环选择同一 App 的窗口")
+                HStack(spacing: 7) {
+                    Text("松开 \(model.activationKey.symbol) 确认切换").foregroundStyle(.primary)
+                    Text("·  ← → 选择  ·  Esc 取消").foregroundStyle(.secondary)
+                    Spacer()
+                    Text(model.windows.count > 9 ? "前 9 个支持数字直达" : "按编号快速选择")
+                        .foregroundStyle(.secondary)
+                }.font(.system(size: 11))
+            }
         }
         .padding(24)
         .background(VisualEffect().overlay(Color(red: 0.055, green: 0.07, blue: 0.085).opacity(0.74)))
         .clipShape(RoundedRectangle(cornerRadius: 22))
         .overlay(RoundedRectangle(cornerRadius: 22).strokeBorder(.white.opacity(0.15), lineWidth: 1))
         .environment(\.colorScheme, .dark)
+    }
+}
+
+private struct ShortcutKeycap: View {
+    let symbol: String
+
+    var body: some View {
+        Text(symbol)
+            .font(.system(size: 20, weight: .medium, design: .monospaced))
+            .foregroundStyle(.mint)
+            .frame(width: 36, height: 30)
+            .background(Color.white.opacity(0.08))
+            .clipShape(RoundedRectangle(cornerRadius: 6))
+            .overlay(RoundedRectangle(cornerRadius: 6).strokeBorder(.white.opacity(0.22), lineWidth: 1))
+            .shadow(color: .black.opacity(0.3), radius: 0, y: 2)
     }
 }
 

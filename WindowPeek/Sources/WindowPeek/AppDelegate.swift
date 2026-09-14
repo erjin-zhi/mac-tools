@@ -475,7 +475,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, NSMe
         // A slow enumeration may already have revealed the loading panel. Keep its
         // geometry for this session instead of visibly shrinking/expanding it.
         if !panel.isVisible {
-            panel.setFrame(CGRect(x: frame.midX - width / 2, y: frame.midY - 165, width: width, height: 330), display: false, animate: false)
+            panel.setFrame(CGRect(x: frame.midX - width / 2, y: frame.midY - 183, width: width, height: 366), display: false, animate: false)
         }
         if reveal {
             panel.contentView?.layoutSubtreeIfNeeded()
