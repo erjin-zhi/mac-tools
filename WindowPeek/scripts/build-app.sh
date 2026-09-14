@@ -8,7 +8,11 @@ STAGING="$(mktemp -d "${TMPDIR:-/tmp}/windowpeek-bundle.XXXXXX")"
 trap 'rm -rf "$STAGING"' EXIT
 APP="$STAGING/Window Peek.app"
 DESTINATION="$ROOT/dist/Window Peek.app"
-mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
+mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources" "$APP/Contents/Frameworks"
+FRAMEWORK="$ROOT/.build/artifacts/sparkle/Sparkle/Sparkle.xcframework/macos-arm64_x86_64/Sparkle.framework"
+[[ -d "$FRAMEWORK" ]] || { printf 'Sparkle framework missing: %s\n' "$FRAMEWORK" >&2; exit 1; }
+ditto "$FRAMEWORK" "$APP/Contents/Frameworks/Sparkle.framework"
+cp "$ROOT/Updates/Sparkle-LICENSE.txt" "$APP/Contents/Resources/Sparkle-LICENSE.txt"
 swiftc Sources/WindowPeek/IconArtwork.swift scripts/IconBuilder/main.swift -o .build/icon-builder
 .build/icon-builder "$ROOT/Assets"
 iconutil -c icns "$ROOT/Assets/WindowPeek.iconset" -o "$APP/Contents/Resources/WindowPeek.icns"
@@ -25,14 +29,13 @@ cat > "$APP/Contents/Info.plist" <<'PLIST'
   <key>CFBundleInfoDictionaryVersion</key><string>6.0</string>
   <key>NSPrincipalClass</key><string>NSApplication</string>
   <key>CFBundlePackageType</key><string>APPL</string>
-  <key>CFBundleShortVersionString</key><string>0.2.2</string>
-  <key>CFBundleVersion</key><string>4</string>
   <key>LSMinimumSystemVersion</key><string>14.0</string>
   <key>LSUIElement</key><true/>
   <key>NSHighResolutionCapable</key><true/>
   <key>NSScreenCaptureUsageDescription</key><string>在长按激活键时显示当前应用的窗口预览。画面仅在内存中使用，不保存或上传。</string>
 </dict></plist>
 PLIST
+python3 "$ROOT/scripts/configure-updates.py" "$APP"
 # Finder / synced folders may attach metadata that invalidates strict bundle verification.
 xattr -dr com.apple.FinderInfo "$APP" 2>/dev/null || true
 xattr -dr com.apple.ResourceFork "$APP" 2>/dev/null || true
@@ -41,7 +44,7 @@ if [[ -z "$SIGN_IDENTITY" ]]; then
   SIGN_IDENTITY="-"
   printf 'No Developer ID identity found; using ad-hoc signing. Updates may require reauthorization.\n'
 fi
-codesign --force --sign "$SIGN_IDENTITY" --timestamp=none --identifier local.windowpeek.app "$APP"
+"$ROOT/scripts/sign-bundle.sh" "$APP" "$SIGN_IDENTITY" --timestamp=none
 codesign --verify --strict "$APP"
 plutil -lint "$APP/Contents/Info.plist"
 mkdir -p "$ROOT/dist"

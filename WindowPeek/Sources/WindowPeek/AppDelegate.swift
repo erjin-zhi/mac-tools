@@ -26,6 +26,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, NSMe
     private let keyboard = KeyboardMonitor()
     private let model = SwitcherModel()
     private let settings = SettingsModel()
+    private let updates = UpdateService()
     private let panel = SwitcherPanel()
     private var statusItem: NSStatusItem!
     private let enabledMenuItem = NSMenuItem()
@@ -85,6 +86,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, NSMe
         hostingView.sizingOptions = []
         panel.contentView = hostingView
         configureSettings()
+        if !CommandLine.arguments.contains("--demo") {
+            updates.start()
+            settings.updates = updates
+        }
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
         statusItem.button?.image = IconArtwork.menuImage()
         let menu = NSMenu()
@@ -96,6 +101,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, NSMe
         menu.addItem(enabledMenuItem)
         menu.addItem(.separator())
         menu.addItem(withTitle: "Window Peek 设置…", action: #selector(showSettings), keyEquivalent: ",").target = self
+        menu.addItem(updates.menuItem())
         menu.addItem(withTitle: "查看演示", action: #selector(showDemo), keyEquivalent: "").target = self
         menu.addItem(.separator())
         menu.addItem(withTitle: "退出 Window Peek", action: #selector(quit), keyEquivalent: "q").target = self

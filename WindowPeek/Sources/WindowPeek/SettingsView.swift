@@ -11,6 +11,7 @@ final class SettingsModel: ObservableObject {
     @Published var delay = 0.25
     @Published var activationKey: ActivationKey = .command
     @Published var status = ""
+    @Published var updates: UpdateService?
     var refresh: (() -> Void)?
     var requestAccessibility: (() -> Void)?
     var requestRecording: (() -> Void)?
@@ -29,6 +30,14 @@ final class SettingsModel: ObservableObject {
 struct SettingsView: View {
     @ObservedObject var model: SettingsModel
     var body: some View {
+        ScrollView { settingsContent }
+            .scrollBounceBehavior(.basedOnSize)
+            .frame(width: 620, height: min(740, max(400, (NSScreen.main?.visibleFrame.height ?? 820) - 80)))
+            .background(Color(red: 0.07, green: 0.085, blue: 0.10))
+            .environment(\.colorScheme, .dark)
+    }
+
+    private var settingsContent: some View {
         VStack(alignment: .leading, spacing: 24) {
             HStack(spacing: 16) {
                 Image(nsImage: model.icon)
@@ -86,6 +95,7 @@ struct SettingsView: View {
                     }.labelsHidden().frame(width: 120)
                 }
             }.font(.system(size: 13))
+            if let updates = model.updates { UpdateSettingsView(service: updates) }
             HStack {
                 Circle().fill(model.running ? .mint : .orange).frame(width: 7, height: 7)
                 Text(model.status).font(.system(size: 11)).foregroundStyle(.secondary)
@@ -102,8 +112,6 @@ struct SettingsView: View {
             }
         }
         .padding(30).frame(width: 620)
-        .background(Color(red: 0.07, green: 0.085, blue: 0.10))
-        .environment(\.colorScheme, .dark)
     }
 
     private func permissionRow(_ title: String, detail: String, symbol: String, granted: Bool, needsRestart: Bool = false, action: (() -> Void)?) -> some View {
@@ -120,6 +128,25 @@ struct SettingsView: View {
             } else {
                 Button("去开启") { action?() }.controlSize(.small)
             }
+        }
+    }
+}
+
+private struct UpdateSettingsView: View {
+    @ObservedObject var service: UpdateService
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack {
+                Text("软件更新").font(.system(size: 14, weight: .semibold))
+                Text("版本 \(Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "—")")
+                    .font(.system(size: 11)).foregroundStyle(.secondary)
+                Spacer()
+                Button("检查更新…") { service.check() }.disabled(!service.canCheck)
+            }
+            Toggle("自动检查更新", isOn: Binding(get: { service.automaticallyChecks }, set: { service.setAutomaticallyChecks($0) }))
+                .toggleStyle(.switch).tint(.mint).font(.system(size: 13))
+            Text("运行期间每天检查一次，发现新版本后由你选择安装。")
+                .font(.system(size: 11)).foregroundStyle(.secondary)
         }
     }
 }

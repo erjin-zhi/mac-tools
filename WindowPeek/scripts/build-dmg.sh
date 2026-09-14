@@ -15,7 +15,7 @@ trap cleanup EXIT
 mkdir -p "$STAGING/content" "$MOUNT"
 APP="$STAGING/content/Window Peek.app"
 ditto --norsrc --noextattr "$ROOT/dist/Window Peek.app" "$APP"
-codesign --force --sign "$SIGN_IDENTITY" --options runtime --timestamp --identifier local.windowpeek.app "$APP"
+"$ROOT/scripts/sign-bundle.sh" "$APP" "$SIGN_IDENTITY" --timestamp
 codesign --verify --deep --strict "$APP"
 ln -s /Applications "$STAGING/content/Applications"
 mkdir -p "$STAGING/content/.background"

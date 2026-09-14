@@ -1,0 +1,10 @@
+{
+  "version": "0.3.0",
+  "build": "5",
+  "minimumSystemVersion": "14.0",
+  "feedURL": "https://raw.githubusercontent.com/erjin-zhi/mac-tools/windowpeek-updates/windowpeek/appcast.xml",
+  "repository": "erjin-zhi/mac-tools",
+  "feedBranch": "windowpeek-updates",
+  "keychainAccount": "local.windowpeek.app.sparkle",
+  "publicKey": "2O97AODdWUXGBf9c9UZqBRv/8G2a5ucDahr8kvLagsE="
+}
