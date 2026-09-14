@@ -32,14 +32,14 @@ open "$HOME/Applications/Window Peek.app"
 
 ## DMG 安装包
 
-运行 `./scripts/build-dmg.sh`，生成 `dist/WindowPeek-0.3.0-arm64-Installer.dmg` 及 SHA-256 校验文件。脚本必须使用 Developer ID Application 证书，为应用启用 Hardened Runtime 并添加安全时间戳，同时签名 DMG；构建后会校验映像并挂载检查应用签名和安装入口。安装窗口使用专属背景和固定左右布局，将左侧应用拖到右侧 Applications 即可，不再附带安装说明 TXT。首次打包会在 `.build/dmg-tools` 创建隔离的 Python 环境并安装布局依赖。
+运行 `./scripts/build-dmg.sh`，生成 `dist/WindowPeek-0.3.1-arm64-Installer.dmg` 及 SHA-256 校验文件。脚本必须使用 Developer ID Application 证书，为应用启用 Hardened Runtime 并添加安全时间戳，同时签名 DMG；构建后会校验映像并挂载检查应用签名和安装入口。安装窗口使用专属背景和固定左右布局，将左侧应用拖到右侧 Applications 即可，不再附带安装说明 TXT。首次打包会在 `.build/dmg-tools` 创建隔离的 Python 环境并安装布局依赖。
 
 打开 DMG，将应用拖到 Applications。若已经安装在 `~/Applications`，请先退出旧版本并替换原位置，避免多个副本；不要直接从 DMG 启动应用。打包不会自动修复系统中旧签名对应的录屏授权记录。
 
 公证时显式指定本次安装包，避免提交旧文件：
 
 ```bash
-./scripts/notarize-dmg.sh windowpeek-notary dist/WindowPeek-0.3.0-arm64-Installer.dmg
+./scripts/notarize-dmg.sh windowpeek-notary dist/WindowPeek-0.3.1-arm64-Installer.dmg
 ```
 
 需要先在本机钥匙串配置公证凭据。脚本在等待前保存提交编号；等待中断后可在同一命令末尾追加该编号继续。公证通过后附加票据、验证并重新生成校验文件。GitHub Release 与 Apple 公证是两个独立步骤。

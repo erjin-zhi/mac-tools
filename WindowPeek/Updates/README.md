@@ -6,7 +6,7 @@
 
 ## 每次发版
 
-1. 修改 `config.json` 的 `version` 和 `build`（构建号必须严格递增），编写 `Updates/<version>.md` 的用户说明。
+1. 修改 `config.json` 的 `version` 和 `build`（构建号必须严格递增），编写 `Updates/<version>.md` 的用户说明；同步仓库首页 README 的当前发行版、版本链接和更新摘要，以及使用说明中的安装包文件名示例。
 2. Review、提交并推送到 GitHub 的 `main`。
 3. 在 `WindowPeek` 目录执行：
 
@@ -15,6 +15,8 @@ python3 scripts/release.py --publish
 ```
 
 这条命令自动运行核心测试与发布安全测试、构建并签名 DMG、Apple 公证与附票、生成并验证 EdDSA 更新签名、创建草稿 Release 和标签、上传安装包与校验文件、核对 GitHub 摘要、公开 Release，最后发布 appcast。任何中间步骤失败都不会提前推送新版更新提示。标签必须对应当前提交，已有不同内容的资产不会覆盖，更新清单通过文件 SHA 防止并发覆盖。
+
+发布完成后核对 GitHub 最新 Release、公开 appcast 和 README 的当前发行版一致。
 
 仅准备可审核产物（不创建 Release、不更新线上版本清单）：
 
