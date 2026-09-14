@@ -22,3 +22,7 @@ open "$HOME/Applications/Window Peek.app"
 首次使用需要授予辅助功能和屏幕录制权限，详见 [Window Peek 使用说明](WindowPeek/README.md)。
 
 构建缓存、应用安装包与本机文件不纳入源码版本管理。
+
+## 许可证
+
+本项目采用 [MIT 许可证](LICENSE)。
