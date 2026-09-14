@@ -3,6 +3,23 @@
     <channel>
         <title>Window Peek</title>
         <item>
+            <title>0.3.1</title>
+            <pubDate>Tue, 15 Sep 2026 00:23:36 +0800</pubDate>
+            <sparkle:version>6</sparkle:version>
+            <sparkle:shortVersionString>0.3.1</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+            <sparkle:hardwareRequirements>arm64</sparkle:hardwareRequirements>
+            <description sparkle:format="markdown"><![CDATA[让同一应用的窗口切换更容易上手。
+
+- 长按激活键后，弹窗底部新增两个键帽，直观展示激活键与反引号键的组合。
+- 明确提示：按住激活键，反复按反引号键，循环选择同一应用的窗口，松开激活键确认切换。
+- 键帽会随自定义激活键设置变化，同时保留方向键、数字选择和 Esc 取消的提示。
+
+0.3.0 用户可通过应用内“检查更新”安装。需要 macOS 14 或更新版本，当前安装包适用于 Apple Silicon。
+]]></description>
+            <enclosure url="https://github.com/erjin-zhi/windowpick/releases/download/windowpeek-v0.3.1/WindowPeek-0.3.1-arm64-Installer.dmg" length="2459855" type="application/octet-stream" sparkle:edSignature="3POT4e0mz7bVfClDLMVmVLxePmanfBdXlJ/B1vctsBSJ8HyVAB3PrQecSro5VKQ1Xs6JipLA34U5KgwuBHnhDg=="/>
+        </item>
+        <item>
             <title>0.3.0</title>
             <pubDate>Tue, 15 Sep 2026 00:12:44 +0800</pubDate>
             <sparkle:version>5</sparkle:version>
