@@ -18,29 +18,33 @@ ditto --norsrc --noextattr "$ROOT/dist/Window Peek.app" "$APP"
 codesign --force --sign "$SIGN_IDENTITY" --options runtime --timestamp --identifier local.windowpeek.app "$APP"
 codesign --verify --deep --strict "$APP"
 ln -s /Applications "$STAGING/content/Applications"
-cat > "$STAGING/content/安装说明.txt" <<'TEXT'
-Window Peek
-
-将 Window Peek.app 拖到 Applications，安装后从应用程序打开。
-更新前请先从菜单栏退出旧版本；如果原来安装在用户目录 ~/Applications，
-请替换原位置的版本，避免保留多个副本。不要直接从磁盘映像运行。
-
-需要 macOS 14 或更新版本，Apple Silicon 芯片。
-首次使用请在系统设置中开启辅助功能和录屏权限，随后重新启动应用。
-默认长按 Command 显示窗口预览，按数字选择，松开切换。
-
-此安装包使用 Developer ID 证书签名，Apple 公证状态请查看下载页的发布说明。
-TEXT
+mkdir -p "$STAGING/content/.background"
+swiftc "$ROOT/scripts/DMGArtwork/main.swift" -o "$STAGING/dmg-artwork"
+"$STAGING/dmg-artwork" "$STAGING/content/.background/installer.png"
 VERSION="$(/usr/libexec/PlistBuddy -c 'Print CFBundleShortVersionString' "$APP/Contents/Info.plist")"
 ARCH="$(lipo -archs "$APP/Contents/MacOS/WindowPeek" | tr ' ' '-')"
-NAME="WindowPeek-$VERSION-$ARCH.dmg"
-hdiutil create -volname 'Window Peek' -srcfolder "$STAGING/content" -format UDZO -fs HFS+ "$STAGING/$NAME"
+NAME="WindowPeek-$VERSION-$ARCH-Installer.dmg"
+hdiutil create -volname 'Window Peek' -srcfolder "$STAGING/content" -format UDRW -fs HFS+ "$STAGING/layout.dmg"
+hdiutil attach "$STAGING/layout.dmg" -nobrowse -mountpoint "$MOUNT"
+MOUNTED=true
+PYTHON="$ROOT/.build/dmg-tools/bin/python"
+if [[ ! -x "$PYTHON" ]]; then python3 -m venv "$ROOT/.build/dmg-tools"; fi
+if ! "$PYTHON" -c 'import ds_store, mac_alias' 2>/dev/null; then
+  "$PYTHON" -m pip install 'ds-store==1.3.3' 'mac-alias==2.2.3'
+fi
+"$PYTHON" "$ROOT/scripts/layout-dmg.py" "$MOUNT"
+[[ -s "$MOUNT/.DS_Store" ]]
+sync
+hdiutil detach "$MOUNT"
+MOUNTED=false
+hdiutil convert "$STAGING/layout.dmg" -format UDZO -o "$STAGING/$NAME"
 codesign --sign "$SIGN_IDENTITY" --timestamp "$STAGING/$NAME"
 codesign --verify --strict "$STAGING/$NAME"
 hdiutil verify "$STAGING/$NAME"
 hdiutil attach "$STAGING/$NAME" -readonly -nobrowse -mountpoint "$MOUNT"
 MOUNTED=true
 codesign --verify --deep --strict "$MOUNT/Window Peek.app"
+[[ ! -e "$MOUNT/安装说明.txt" && -s "$MOUNT/.DS_Store" && -s "$MOUNT/.background/installer.png" ]]
 [[ "$(readlink "$MOUNT/Applications")" == /Applications ]]
 cmp "$APP/Contents/MacOS/WindowPeek" "$MOUNT/Window Peek.app/Contents/MacOS/WindowPeek"
 hdiutil detach "$MOUNT"

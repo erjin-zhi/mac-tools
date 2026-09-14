@@ -105,7 +105,6 @@ struct SwitcherView: View {
 }
 
 private struct WindowCard: View {
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     let window: WindowItem
     let index: Int
     let selected: Bool
@@ -115,8 +114,8 @@ private struct WindowCard: View {
             ZStack {
                 Color.black.opacity(0.25)
                 if let image = window.image {
-                    Image(nsImage: image).resizable().scaledToFit().padding(7)
-                        .transition(.opacity)
+                    Image(nsImage: image).resizable().scaledToFit()
+                        .frame(width: max(0, width - 14), height: 128)
                 } else if window.previewUnavailable {
                     VStack(spacing: 10) {
                         Image(systemName: window.minimized ? "minus.rectangle" : "macwindow")
@@ -142,7 +141,7 @@ private struct WindowCard: View {
                     Spacer()
                 }.padding(10)
             }.frame(width: width, height: 142)
-                .animation(reduceMotion ? nil : .easeOut(duration: 0.12), value: window.image != nil)
+                .transaction { $0.animation = nil; $0.disablesAnimations = true }
             HStack(spacing: 7) {
                 Circle().fill(selected ? .mint : .clear).frame(width: 5, height: 5)
                 Text(window.title).font(.system(size: 12, weight: selected ? .semibold : .regular)).lineLimit(1)

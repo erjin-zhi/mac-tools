@@ -1,4 +1,4 @@
-/// Disambiguates windows whose geometry already matches. Never guesses between duplicate titles.
+/// Fallback for windows without a system ID. Never guesses between duplicate titles.
 public enum WindowTitleMatch {
     public static func index(axTitle: String, candidateTitles: [String?], applicationSuffix: String? = nil) -> Int? {
         guard !axTitle.isEmpty else { return candidateTitles.count == 1 ? 0 : nil }

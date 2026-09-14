@@ -35,23 +35,37 @@ enum WindowService {
     }
 
     /// Read on a worker thread: a slow accessibility client must not stall the keyboard tap.
-    static func windows(pid: pid_t) throws -> [WindowItem] {
+    static func windows(pid: pid_t, identify: (AXUIElement) -> CGWindowID? = WindowIdentityBridge.windowID) throws -> [WindowItem] {
         try Task.checkCancellation()
         let app = AXUIElementCreateApplication(pid)
         AXUIElementSetMessagingTimeout(app, 0.35)
         guard let elements = attribute(app, kAXWindowsAttribute) as? [AXUIElement] else { return [] }
         try Task.checkCancellation()
         let info = (CGWindowListCopyWindowInfo(.optionAll, kCGNullWindowID) as? [[String: Any]] ?? [])
-            .filter { ($0[kCGWindowOwnerPID as String] as? Int) == Int(pid)
-                && ($0[kCGWindowLayer as String] as? Int) == 0 }
+            .enumerated().compactMap { index, record -> WindowRecord? in
+                guard record[kCGWindowOwnerPID as String] as? Int == Int(pid),
+                      record[kCGWindowLayer as String] as? Int == 0,
+                      let id = record[kCGWindowNumber as String] as? UInt32 else { return nil }
+                let bounds = (record[kCGWindowBounds as String] as? NSDictionary)
+                    .flatMap { CGRect(dictionaryRepresentation: $0) }
+                return WindowRecord(id: id, order: index,
+                    title: record[kCGWindowName as String] as? String, bounds: bounds)
+            }
         let focused = attribute(app, kAXFocusedWindowAttribute)
         let bundleID = NSRunningApplication(processIdentifier: pid)?.bundleIdentifier
         let titleSuffix = bundleID == "com.google.Chrome" ? " - Google Chrome" : nil
-        var entries: [(Int, WindowItem)] = []
-        var usedIDs = Set<CGWindowID>()
-        for element in elements {
+        let identifiedElements = try elements.map { element in
             try Task.checkCancellation()
             AXUIElementSetMessagingTimeout(element, 0.35)
+            return (element: element, windowID: identify(element))
+        }
+        // Never let a heuristic match take an ID belonging to another exact AX match.
+        let reservedIDs = Set(identifiedElements.compactMap(\.windowID))
+        var entries: [(Int, WindowItem)] = []
+        var usedIDs = Set<CGWindowID>()
+        for identified in identifiedElements {
+            let element = identified.element
+            try Task.checkCancellation()
             guard attribute(element, kAXRoleAttribute) as? String == kAXWindowRole else { continue }
             let rect = frame(of: element)
             try Task.checkCancellation()
@@ -59,25 +73,44 @@ enum WindowService {
             let title = attribute(element, kAXTitleAttribute) as? String ?? ""
             let minimized = attribute(element, kAXMinimizedAttribute) as? Bool ?? false
             try Task.checkCancellation()
-            let candidates = info.enumerated().filter { _, record in
-                guard let id = record[kCGWindowNumber as String] as? UInt32, !usedIDs.contains(id),
-                      let bounds = record[kCGWindowBounds as String] as? NSDictionary,
-                      let other = CGRect(dictionaryRepresentation: bounds) else { return false }
+            let geometryCandidates = info.filter { record in
+                guard let other = record.bounds else { return false }
                 return abs(rect.minX - other.minX) < 3 && abs(rect.minY - other.minY) < 3
                     && abs(rect.width - other.width) < 3 && abs(rect.height - other.height) < 3
             }
-            // Ambiguous geometry is intentionally left without an image; focus uses the exact AX object.
-            let matchIndex = WindowTitleMatch.index(axTitle: title,
-                candidateTitles: candidates.map { $0.element[kCGWindowName as String] as? String },
-                applicationSuffix: titleSuffix)
+            let isFocused = focused.map { CFEqual($0, element) } ?? false
+            guard WindowEligibility.includes(
+                isStandard: attribute(element, kAXSubroleAttribute) as? String == kAXStandardWindowSubrole,
+                isMain: attribute(element, kAXMainAttribute) as? Bool == true,
+                isFocused: isFocused,
+                isModal: attribute(element, kAXModalAttribute) as? Bool == true,
+                isMinimized: minimized,
+                hasNormalLayerWindow: identified.windowID.map { id in
+                    info.contains { $0.id == id }
+                } ?? !geometryCandidates.isEmpty
+            ) else {
+                previewLog.debug("Excluded auxiliary AX window: pid=\(pid)")
+                continue
+            }
+            let candidates = info.filter { !usedIDs.contains($0.id) }
+            let matchIndex = WindowIdentityMatch.index(windowID: identified.windowID,
+                candidateIDs: candidates.map(\.id)) {
+                let fallbackCandidates = candidates.enumerated().filter { _, candidate in
+                    !reservedIDs.contains(candidate.id)
+                        && geometryCandidates.contains { $0.id == candidate.id }
+                }
+                guard let index = WindowTitleMatch.index(axTitle: title,
+                    candidateTitles: fallbackCandidates.map { $0.element.title },
+                    applicationSuffix: titleSuffix) else { return nil }
+                return fallbackCandidates[index].offset
+            }
             let match = matchIndex.map { candidates[$0] }
-            let windowID = match?.element[kCGWindowNumber as String] as? UInt32
+            let windowID = match?.id
             if windowID == nil {
-                previewLog.notice("AX match missing: pid=\(pid) geometryCandidates=\(candidates.count) minimized=\(minimized)")
+                previewLog.notice("AX match missing: pid=\(pid) geometryCandidates=\(geometryCandidates.count) hasSystemID=\(identified.windowID != nil) minimized=\(minimized)")
             }
             if let windowID { usedIDs.insert(windowID) }
-            let isFocused = focused.map { CFEqual($0, element) } ?? false
-            entries.append((isFocused ? -1 : (match?.offset ?? 10000 + entries.count), WindowItem(
+            entries.append((isFocused ? -1 : (match?.order ?? 10000 + entries.count), WindowItem(
                 id: UUID(), element: element, windowID: windowID,
                 title: title.isEmpty ? "未命名窗口" : title, minimized: minimized
             )))
@@ -116,4 +149,11 @@ enum WindowService {
             return result == .success
         }.value
     }
+}
+
+private struct WindowRecord {
+    let id: CGWindowID
+    let order: Int
+    let title: String?
+    let bounds: CGRect?
 }

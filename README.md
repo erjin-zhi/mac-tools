@@ -6,7 +6,7 @@
 | --- | --- | --- |
 | [Window Peek](WindowPeek/README.md) | 长按修饰键预览当前应用的窗口，按编号或方向键选择，松开切换 | macOS 14+ |
 
-安装包见 [Window Peek 0.2.1 Release](https://github.com/erjin-zhi/mac-tools/releases/tag/windowpeek-v0.2.1)。提供 Apple Silicon 版 DMG 和 SHA-256 校验文件。
+安装包见 [Window Peek 最新发布版](https://github.com/erjin-zhi/mac-tools/releases/latest)。提供 Apple Silicon 版 DMG 和 SHA-256 校验文件。
 
 ## 构建 Window Peek
 

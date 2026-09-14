@@ -80,7 +80,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, NSMe
             self.visibleWindows = visible
             self.prioritizePreviews()
         }
-        panel.contentView = NSHostingView(rootView: SwitcherView(model: model))
+        let hostingView = NSHostingView(rootView: SwitcherView(model: model))
+        // The panel owns its size; image intrinsic sizes must never resize the window.
+        hostingView.sizingOptions = []
+        panel.contentView = hostingView
         configureSettings()
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
         statusItem.button?.image = IconArtwork.menuImage()
@@ -460,9 +463,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, NSMe
         let screen = NSScreen.screens.first { $0.frame.contains(NSEvent.mouseLocation) } ?? NSScreen.main
         let frame = screen?.visibleFrame ?? CGRect(x: 0, y: 0, width: 1440, height: 900)
         let width = min(frame.width - 48, max(600, CGFloat(min(count, 5)) * 236 + 42))
-        let cardWidth = min(224, max(160, (width - 72) / CGFloat(min(max(count, 1), 3))))
+        let layoutWidth = panel.isVisible ? panel.frame.width : width
+        let cardWidth = min(224, max(160, (layoutWidth - 72) / CGFloat(min(max(count, 1), 3))))
         if model.cardWidth != cardWidth { model.cardWidth = cardWidth }
-        panel.setFrame(CGRect(x: frame.midX - width / 2, y: frame.midY - 165, width: width, height: 330), display: panel.isVisible)
+        // A slow enumeration may already have revealed the loading panel. Keep its
+        // geometry for this session instead of visibly shrinking/expanding it.
+        if !panel.isVisible {
+            panel.setFrame(CGRect(x: frame.midX - width / 2, y: frame.midY - 165, width: width, height: 330), display: false, animate: false)
+        }
         if reveal {
             panel.contentView?.layoutSubtreeIfNeeded()
             panel.orderFrontRegardless()
