@@ -1,6 +1,6 @@
 # 窗见 · Window Peek
 
-**长按一瞥，松开切换。** [下载发行版](https://github.com/erjin-zhi/mac-tools/releases/latest) · [功能概览](../README.md)
+**长按一瞥，松开切换。** [下载发行版](https://github.com/erjin-zhi/chuangjian/releases/latest) · [功能概览](../README.md)
 
 macOS 原生菜单栏窗口预览与切换工具（window preview & switcher）：长按 Command，横向查看**当前应用**的窗口缩略图，按编号选中，松开切换。使用 SwiftUI、AppKit、ScreenCaptureKit 和辅助功能 API；窗口编号桥接的兼容性说明见下方。
 

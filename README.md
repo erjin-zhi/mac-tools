@@ -8,7 +8,7 @@
 
 长按一瞥，松开切换。在 Chrome、Safari、Finder 等应用打开多个窗口时，长按 Command 查看当前应用的窗口缩略图，按数字或方向键选择，松开即可切换到目标窗口。
 
-[下载 DMG 安装包](https://github.com/erjin-zhi/mac-tools/releases/latest) · [详细使用说明](WindowPeek/README.md) · [反馈问题](https://github.com/erjin-zhi/mac-tools/issues) · [English](#english)
+[下载 DMG 安装包](https://github.com/erjin-zhi/chuangjian/releases/latest) · [详细使用说明](WindowPeek/README.md) · [反馈问题](https://github.com/erjin-zhi/chuangjian/issues) · [English](#english)
 
 **macOS 14+ · Apple Silicon · 原生 Swift / SwiftUI · 免费开源 · MIT License**
 
@@ -41,7 +41,7 @@
 
 ## 下载与安装
 
-1. 前往 [Releases 下载页](https://github.com/erjin-zhi/mac-tools/releases/latest)，下载 `WindowPeek-<版本>-arm64-Installer.dmg`。同时提供 SHA-256 校验文件。
+1. 前往 [Releases 下载页](https://github.com/erjin-zhi/chuangjian/releases/latest)，下载 `WindowPeek-<版本>-arm64-Installer.dmg`。同时提供 SHA-256 校验文件。
 2. 打开 DMG，将 **Window Peek** 拖入 **Applications**。已安装的用户先退出应用，再替换原位置的副本。
 3. 启动应用，从菜单栏打开设置，按照提示授予所需权限。
 4. 在同一个应用中打开两个或更多窗口，长按 Command 开始使用。
@@ -75,8 +75,8 @@
 需要 macOS、Xcode Command Line Tools 和 Swift 5.10 或更新版本。首次构建会下载 Sparkle 依赖。
 
 ```bash
-git clone https://github.com/erjin-zhi/mac-tools.git
-cd mac-tools/WindowPeek
+git clone https://github.com/erjin-zhi/chuangjian.git
+cd chuangjian/WindowPeek
 swift test
 ./scripts/build-app.sh --install
 open "$HOME/Applications/Window Peek.app"
@@ -97,13 +97,13 @@ open "$HOME/Applications/Window Peek.app"
 
 Requires **macOS 14+**. Prebuilt DMG releases are for **Apple Silicon**. Accessibility permission is required for window switching; Screen Recording permission enables thumbnails. Protected or unavailable windows may show placeholders. Window Peek switches windows within the current app, rather than individual browser tabs.
 
-[Download releases](https://github.com/erjin-zhi/mac-tools/releases/latest) · [Report a bug](https://github.com/erjin-zhi/mac-tools/issues) · [Source & usage guide](WindowPeek/README.md)
+[Download releases](https://github.com/erjin-zhi/chuangjian/releases/latest) · [Report a bug](https://github.com/erjin-zhi/chuangjian/issues) · [Source & usage guide](WindowPeek/README.md)
 
 ## 反馈与贡献
 
-欢迎通过 [Issues](https://github.com/erjin-zhi/mac-tools/issues) 报告问题或提出建议。反馈时请附上 macOS 版本、芯片类型、窗见版本、目标应用和复现步骤；截图请先遮住私人内容。
+欢迎通过 [Issues](https://github.com/erjin-zhi/chuangjian/issues) 报告问题或提出建议。反馈时请附上 macOS 版本、芯片类型、窗见版本、目标应用和复现步骤；截图请先遮住私人内容。
 
-本仓库 `mac-tools` 存放 macOS 工具，目前主要项目为 `WindowPeek/`。应用源码、使用文档、测试和构建脚本均在该目录下。
+本仓库 `chuangjian` 是「窗见 · Window Peek」的独立项目。应用源码、使用文档、测试和构建脚本位于 `WindowPeek/` 目录。
 
 ## 许可证
 
