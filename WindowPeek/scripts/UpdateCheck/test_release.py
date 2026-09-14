@@ -40,6 +40,8 @@ class PublicationTests(unittest.TestCase):
     def api(self, path, payload=None):
         if '/releases/tags/' in path:
             return self.remote
+        if '/git/ref/tags/' in path:
+            return {'object': {'sha': self.head}}
         if '/commits/' in path:
             return dict(sha=self.head)
         self.events.append(('feed', payload))
@@ -51,6 +53,32 @@ class PublicationTests(unittest.TestCase):
              patch.object(release, 'read_feed', side_effect=[(b'old-feed', 'old-sha'), (b'new-feed', 'new-sha')]), \
              patch.object(release, 'validate_feed', return_value=9):
             release.publish(self.config, self.stage, self.head)
+
+    def test_missing_tag_is_created_before_release_publication(self):
+        original_api = self.api
+        def request(path, payload=None):
+            if '/git/ref/tags/' in path:
+                return None
+            if path.endswith('/git/refs'):
+                self.events.append(('tag', payload))
+                return {}
+            return original_api(path, payload)
+        with patch.object(self, 'api', side_effect=request):
+            self.publish()
+        self.assertEqual(self.events[0], ('tag', {'ref': 'refs/tags/windowpeek-v1.0.0', 'sha': self.head}))
+        self.assertEqual(self.events[1][:3], ('gh', 'release', 'edit'))
+
+    def test_existing_draft_is_found_without_creating_another(self):
+        draft = dict(tag_name='v1', draft=True, id=42)
+        with patch.object(release, 'api', side_effect=[None, [draft]]) as request:
+            self.assertEqual(release.find_release('owner/repo', 'v1'), draft)
+            self.assertEqual(request.call_args.args[0], 'repos/owner/repo/releases?per_page=100&page=1')
+
+    def test_ambiguous_drafts_are_rejected(self):
+        drafts = [dict(tag_name='v1', id=1), dict(tag_name='v1', id=2)]
+        with patch.object(release, 'api', side_effect=[None, drafts]):
+            with self.assertRaisesRegex(RuntimeError, 'Multiple release drafts'):
+                release.find_release('owner/repo', 'v1')
 
     def test_assets_public_before_feed_update(self):
         self.publish()

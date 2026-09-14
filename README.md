@@ -37,7 +37,7 @@
 | 按需截图 | 打开预览时获取快照，关闭后释放；截图不写入文件、不上传 |
 | 应用内更新（0.3.0 起） | 使用 Sparkle 自动检查更新，也可手动检查，由用户确认下载、安装和重启 |
 
-> 当前公开发行版为 **0.2.2**。源码中的 **0.3.0** 已接入应用内更新，安装包已准备，尚未公开发布。0.2.2 及更早版本需要手动安装首个支持更新的版本。
+> 当前公开发行版为 **[0.3.0](https://github.com/erjin-zhi/windowpick/releases/tag/windowpeek-v0.3.0)**，已支持应用内更新。0.2.2 及更早版本需手动安装本次更新，之后可在应用内检查和安装新版本。
 
 ## 下载与安装
 
@@ -95,7 +95,7 @@ open "$HOME/Applications/Window Peek.app"
 - Choose Command, Option, Control or Shift as the activation key and adjust the hold delay.
 - Enable or pause the switcher from the menu bar.
 - Capture window snapshots on demand; screenshots stay in memory and are not saved or uploaded.
-- Sparkle in-app updates are integrated in the 0.3.0 source and are pending a public release.
+- Sparkle in-app updates are available from version 0.3.0, with automatic checks and user-confirmed installation.
 
 Requires **macOS 14+**. Prebuilt DMG releases are for **Apple Silicon**. Accessibility permission is required for window switching; Screen Recording permission enables thumbnails. Protected or unavailable windows may show placeholders. WindowPick switches windows within the current app, rather than individual browser tabs.
 

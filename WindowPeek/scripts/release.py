@@ -33,6 +33,26 @@ def api(path, payload=None):
     return json.loads(result.stdout)
 
 
+
+def find_release(repo, tag):
+    # GitHub's by-tag endpoint only returns published releases. Drafts need
+    # the authenticated release listing, otherwise retries create duplicates.
+    published = api(f'repos/{repo}/releases/tags/{tag}')
+    if published is not None:
+        return published
+    page = 1
+    while True:
+        releases = api(f'repos/{repo}/releases?per_page=100&page={page}')
+        matches = [item for item in releases if item['tag_name'] == tag]
+        if len(matches) > 1:
+            raise RuntimeError('Multiple release drafts share this tag; resolve duplicates first.')
+        if matches:
+            return matches[0]
+        if len(releases) < 100:
+            return None
+        page += 1
+
+
 def read_feed(config):
     result = api(f"repos/{config['repository']}/contents/windowpeek/appcast.xml?ref={config['feedBranch']}")
     return (base64.b64decode(result['content']), result['sha']) if result else (EMPTY_FEED, None)
@@ -89,14 +109,15 @@ def publish(config, stage, head):
         raise RuntimeError('Live feed already contains this or a newer build; refusing rollback.')
     tag = f"windowpeek-v{config['version']}"
     repo = config['repository']
-    release = api(f'repos/{repo}/releases/tags/{tag}')
+    if api(f'repos/{repo}/git/ref/tags/{tag}') is None:
+        api(f'repos/{repo}/git/refs', {'ref': f'refs/tags/{tag}', 'sha': head})
+    if api(f'repos/{repo}/commits/{tag}')['sha'] != head:
+        raise RuntimeError('Existing release tag points to a different commit.')
+    release = find_release(repo, tag)
     if release is None:
         run('gh', 'release', 'create', tag, '--repo', repo, '--target', head, '--draft',
             '--title', f"Window Peek {config['version']}", '--notes-file', stage / 'notes.md')
-        release = api(f'repos/{repo}/releases/tags/{tag}')
-    # A remote tag must resolve to this exact commit, including annotated tags.
-    if api(f'repos/{repo}/commits/{tag}')['sha'] != head:
-        raise RuntimeError('Existing release tag points to a different commit.')
+        release = find_release(repo, tag)
     for name in (archive.name, archive.name + '.sha256'):
         asset = next((a for a in release['assets'] if a['name'] == name), None)
         digest = 'sha256:' + manifest['sha256'][name]
@@ -106,7 +127,7 @@ def publish(config, stage, head):
             if not release['draft']:
                 raise RuntimeError('Published release is missing an expected asset.')
             run('gh', 'release', 'upload', tag, stage / name, '--repo', repo)
-    release = api(f'repos/{repo}/releases/tags/{tag}')
+    release = find_release(repo, tag)
     for name in (archive.name, archive.name + '.sha256'):
         asset = next(a for a in release['assets'] if a['name'] == name)
         if asset.get('digest') != 'sha256:' + manifest['sha256'][name]:
